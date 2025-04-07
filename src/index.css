@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Purple Theme */
+    --theme-purple-primary-50: #faf5ff;
+    --theme-purple-primary-100: #f3e8ff;
+    --theme-purple-primary-200: #e9d5ff;
+    --theme-purple-primary-300: #d8b4fe;
+    --theme-purple-primary-400: #c084fc;
+    --theme-purple-primary-500: #a855f7;
+    --theme-purple-primary-600: #9333ea;
+    --theme-purple-primary-700: #7e22ce;
+    --theme-purple-primary-800: #6b21a8;
+    --theme-purple-primary-900: #581c87;
+
+    /* Blue Theme */
+    --theme-blue-primary-50: #eff6ff;
+    --theme-blue-primary-100: #dbeafe;
+    --theme-blue-primary-200: #bfdbfe;
+    --theme-blue-primary-300: #93c5fd;
+    --theme-blue-primary-400: #60a5fa;
+    --theme-blue-primary-500: #3b82f6;
+    --theme-blue-primary-600: #2563eb;
+    --theme-blue-primary-700: #1d4ed8;
+    --theme-blue-primary-800: #1e40af;
+    --theme-blue-primary-900: #1e3a8a;
+
+    /* Default theme (Purple) */
+    --primary-50: var(--theme-purple-primary-50);
+    --primary-100: var(--theme-purple-primary-100);
+    --primary-200: var(--theme-purple-primary-200);
+    --primary-300: var(--theme-purple-primary-300);
+    --primary-400: var(--theme-purple-primary-400);
+    --primary-500: var(--theme-purple-primary-500);
+    --primary-600: var(--theme-purple-primary-600);
+    --primary-700: var(--theme-purple-primary-700);
+    --primary-800: var(--theme-purple-primary-800);
+    --primary-900: var(--theme-purple-primary-900);
+  }
+
+  [data-theme="blue"] {
+    --primary-50: var(--theme-blue-primary-50);
+    --primary-100: var(--theme-blue-primary-100);
+    --primary-200: var(--theme-blue-primary-200);
+    --primary-300: var(--theme-blue-primary-300);
+    --primary-400: var(--theme-blue-primary-400);
+    --primary-500: var(--theme-blue-primary-500);
+    --primary-600: var(--theme-blue-primary-600);
+    --primary-700: var(--theme-blue-primary-700);
+    --primary-800: var(--theme-blue-primary-800);
+    --primary-900: var(--theme-blue-primary-900);
+  }
+}
+
+@layer components {
+  .nav-item {
+    @apply flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200;
+  }
+
+  .nav-item-active {
+    @apply bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400;
+  }
+
+  .nav-item-default {
+    @apply text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800;
+  }
+
+  .nav-item-count {
+    @apply ml-auto bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 px-2.5 py-0.5 rounded-full text-xs;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200;
+  }
+}
+
+/* Animations */
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--primary-500) 0%,
+    var(--primary-400) 20%,
+    var(--primary-500) 40%
+  );
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-600;
+}
