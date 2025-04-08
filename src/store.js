@@ -41,17 +41,15 @@ const themeSlice = createSlice({
 // Load initial user data from localStorage
 const savedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 
-
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: savedUser ? {
+    user: {
       ...savedUser,
       posts: [],
       followers: [],
       following: []
-    } : null,
-  
+    },
     loading: false,
     error: null
   },
@@ -63,12 +61,7 @@ const authSlice = createSlice({
         followers: [],
         following: []
       };
-      
-      // Save user and token separately
       localStorage.setItem('user', JSON.stringify(action.payload));
-      if (action.payload.token) {
-        localStorage.setItem('token', action.payload.token);
-      }
     },
     updateUserProfile: (state, action) => {
       state.user = {
@@ -108,10 +101,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       localStorage.removeItem('user');
-      localStorage.removeItem('token');
-    },
-    
-    
+    }
   }
 });
 
@@ -141,6 +131,10 @@ const postsSlice = createSlice({
   reducers: {
     addPost: (state, action) => {
       state.items.unshift(action.payload);
+      // Save to localStorage
+      const savedPosts = JSON.parse(localStorage.getItem('posts') || '[]');
+      savedPosts.unshift(action.payload);
+      localStorage.setItem('posts', JSON.stringify(savedPosts));
     },
     setPosts: (state, action) => {
       state.items = action.payload;
@@ -150,6 +144,18 @@ const postsSlice = createSlice({
     },
     setPostsError: (state, action) => {
       state.error = action.payload;
+    },
+    likePost: (state, action) => {
+      const post = state.items.find(p => p.id === action.payload);
+      if (post) {
+        post.likes += 1;
+      }
+    },
+    unlikePost: (state, action) => {
+      const post = state.items.find(p => p.id === action.payload);
+      if (post) {
+        post.likes -= 1;
+      }
     }
   }
 });
@@ -158,7 +164,7 @@ export const { toggleTheme, setAccentColor } = themeSlice.actions;
 export const { 
   setUser, 
   updateUserProfile, 
-  addPost, 
+  addPost: addUserPost, 
   removePost, 
   addFollower, 
   removeFollower, 
@@ -169,7 +175,14 @@ export const {
   logout 
 } = authSlice.actions;
 export const { markAllNotificationsAsRead, markAllMessagesAsRead } = notificationsSlice.actions;
-export const { setPosts, setPostsLoading, setPostsError } = postsSlice.actions;
+export const { 
+  addPost, 
+  setPosts, 
+  setPostsLoading, 
+  setPostsError,
+  likePost,
+  unlikePost
+} = postsSlice.actions;
 
 const store = configureStore({
   reducer: {
@@ -179,5 +192,11 @@ const store = configureStore({
     posts: postsSlice.reducer
   }
 });
+
+// Load saved posts on startup
+const savedPosts = JSON.parse(localStorage.getItem('posts') || '[]');
+if (savedPosts.length > 0) {
+  store.dispatch(setPosts(savedPosts));
+}
 
 export default store;
