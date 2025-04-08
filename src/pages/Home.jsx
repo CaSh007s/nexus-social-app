@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import TextareaAutosize from 'react-textarea-autosize';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { addPost } from '../store';
+import { addPost, likePost, unlikePost } from '../store';
 import Stories from '../components/Stories';
 import { 
   HeartIcon, 
@@ -30,7 +30,7 @@ const DUMMY_POSTS = [
     },
     content: 'Just launched our new AI-powered product! 🚀 Really excited about the potential impact this could have on the industry. #innovation #tech #ai',
     image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200',
-    timestamp: new Date(2025, 3, 15, 14, 30),
+    timestamp: new Date(2025, 3, 15, 14, 30).toISOString(),
     likes: 142,
     comments: 23,
     shares: 12,
@@ -45,7 +45,7 @@ const DUMMY_POSTS = [
     },
     content: 'Here\'s a sneak peek of the design system I\'ve been working on. What do you think? 🎨 #design #ux',
     image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200',
-    timestamp: new Date(2025, 3, 14, 10, 15),
+    timestamp: new Date(2025, 3, 14, 10, 15).toISOString(),
     likes: 89,
     comments: 15,
     shares: 5,
@@ -60,7 +60,7 @@ const DUMMY_POSTS = [
     },
     content: 'Breaking: Just published our latest research on quantum computing applications in AI. This could revolutionize how we approach machine learning! 🧠 #quantumcomputing #ai #research',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200',
-    timestamp: new Date(2025, 3, 13, 16, 45),
+    timestamp: new Date(2025, 3, 13, 16, 45).toISOString(),
     likes: 234,
     comments: 45,
     shares: 78,
@@ -75,7 +75,7 @@ const DUMMY_POSTS = [
     },
     content: 'Just wrapped up a major redesign project using the latest React features. The performance improvements are incredible! 📈 #webdev #react #performance',
     image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200',
-    timestamp: new Date(2025, 3, 12, 9, 20),
+    timestamp: new Date(2025, 3, 12, 9, 20).toISOString(),
     likes: 167,
     comments: 29,
     shares: 15,
@@ -87,8 +87,17 @@ function CreatePostCard() {
   const [postText, setPostText] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [preview, setPreview] = useState(null);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (selectedFile) {
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  }, [selectedFile]);
 
   const handlePost = () => {
     if (!postText.trim() && !selectedFile) {
@@ -99,13 +108,13 @@ function CreatePostCard() {
     const newPost = {
       id: Date.now(),
       user: {
-        name: user?.username || 'Anonymous',
+        name: user?.fullName || user?.username || 'Anonymous',
         avatar: user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'Anonymous'}&background=random`,
         title: user?.title || 'Member'
       },
       content: postText,
-      image: selectedFile ? URL.createObjectURL(selectedFile) : null,
-      timestamp: new Date(),
+      image: preview,
+      timestamp: new Date().toISOString(),
       likes: 0,
       comments: 0,
       shares: 0,
@@ -116,6 +125,7 @@ function CreatePostCard() {
     toast.success('Post created successfully!');
     setPostText('');
     setSelectedFile(null);
+    setPreview(null);
     setIsExpanded(false);
   };
 
@@ -160,23 +170,26 @@ function CreatePostCard() {
               animate={{ opacity: 1, y: 0 }}
               className="mt-4 space-y-4"
             >
-              {selectedFile && (
+              {preview && (
                 <div className="relative">
-                  {selectedFile.type.startsWith('image/') ? (
+                  {selectedFile?.type.startsWith('image/') ? (
                     <img 
-                      src={URL.createObjectURL(selectedFile)} 
+                      src={preview}
                       alt="Selected" 
                       className="max-h-60 rounded-lg object-cover"
                     />
                   ) : (
                     <video 
-                      src={URL.createObjectURL(selectedFile)} 
+                      src={preview}
                       className="max-h-60 rounded-lg"
                       controls
                     />
                   )}
                   <button
-                    onClick={() => setSelectedFile(null)}
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setPreview(null);
+                    }}
                     className="absolute top-2 right-2 bg-gray-900/50 text-white p-1 rounded-full hover:bg-gray-900/75"
                   >
                     ×
@@ -264,6 +277,11 @@ function Post({ post: initialPost }) {
 
   const handleLike = () => {
     setLiked(!liked);
+    if (!liked) {
+      dispatch(likePost(post.id));
+    } else {
+      dispatch(unlikePost(post.id));
+    }
     setPost(prev => ({
       ...prev,
       likes: liked ? prev.likes - 1 : prev.likes + 1
@@ -286,7 +304,7 @@ function Post({ post: initialPost }) {
         avatar: 'https://ui-avatars.com/api/?name=You&background=random'
       },
       content: newComment,
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     };
 
     setComments(prev => [...prev, newCommentObj]);
@@ -319,7 +337,7 @@ function Post({ post: initialPost }) {
               {post.user.title}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              {format(post.timestamp, 'MMM d, yyyy • h:mm a')}
+              {format(new Date(post.timestamp), 'MMM d, yyyy • h:mm a')}
             </p>
           </div>
         </div>
@@ -449,7 +467,7 @@ function Post({ post: initialPost }) {
                       {comment.user.name}
                     </h4>
                     <span className="text-xs text-gray-500">
-                      {format(comment.timestamp, 'h:mm a')}
+                      {format(new Date(comment.timestamp), 'h:mm a')}
                     </span>
                   </div>
                   <p className="text-gray-800 dark:text-gray-200">
