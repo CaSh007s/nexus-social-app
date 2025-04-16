@@ -152,6 +152,13 @@ See the [LICENSE](./LICENSE) file for more details.
 
 If you like this project, give it a ⭐️  
 Found a bug or have a feature request? Open an issue or submit a PR!
+
+---
+
+## Resources
+
+[Google Drive Folder](https://drive.google.com/drive/u/1/folders/1AiufinVociDdbZAk9NPdlZG1DzfAnMIA)
 ```
+
 
 ---
